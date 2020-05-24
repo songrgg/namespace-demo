@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -99,6 +100,10 @@ func cgroupSetup(pid int) {
 }
 
 func main() {
+	uidPtr := flag.Int("uid", 1000, "user ID the container will run as")
+	gidPtr := flag.Int("gid", 1000, "group ID the container will run as")
+	flag.Parse()
+
 	cmd := reexec.Command("alpine_shell")
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -109,14 +114,14 @@ func main() {
 		UidMappings: []syscall.SysProcIDMap{
 			{
 				ContainerID: 0,
-				HostID:      1000, // use non-root user to run as root
+				HostID:      *uidPtr, // use non-root user to run as root
 				Size:        1,
 			},
 		},
 		GidMappings: []syscall.SysProcIDMap{
 			{
 				ContainerID: 0,
-				HostID:      1000, // use non-root group to run as root
+				HostID:      *gidPtr, // use non-root group to run as root
 				Size:        1,
 			},
 		},
